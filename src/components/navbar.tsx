@@ -1,0 +1,87 @@
+"use client";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
+import { AlertTriangle, CctvIcon, ChevronDown, ChevronUp, LayoutDashboard, LogOut, Settings, Users2 } from "lucide-react";
+import { useState } from "react";
+
+export default function Navbar() {
+  const navLinks = [
+    { name: "Dashboard", href: "/",icon : <LayoutDashboard className="w-4 h-4" /> },
+    { name: "Cameras", href: "/about", icon: <CctvIcon className="w-4 h-4" /> },
+    { name: "Scenes", href: "/services", icon: <Settings className="w-4 h-4" /> },
+    { name: "Incidents", href: "/contact", icon: <AlertTriangle className="w-4 h-4" /> },
+    { name: "Users", href: "/settings", icon: <Users2 className="w-4 h-4" /> },
+  ];
+
+    const [open, setOpen] = useState(false);
+
+
+  return (
+    <div className="relative z-10">
+      {/* Golden blob */}
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[400px] h-[250px] bg-yellow-400/30 blur-[120px] rounded-full pointer-events-none" />
+
+      {/* Navbar */}
+      <nav className="relative z-10 w-full px-8 py-4 flex items-center justify-between  backdrop-blur-md shadow-sm">
+        
+        {/* Left - Logo & Name */}
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 bg-yellow-500 rounded-full shadow" />
+          <span className="text-xl font-semibold tracking-wide text-white">GoldNav</span>
+        </div>
+
+        {/* Center - Navigation */}
+        <div className="space-x-6 text-sm font-medium text-white hidden md:flex">
+          {navLinks.map(link => (
+            <a
+              key={link.name}
+              href={link.href}
+              className="flex items-center gap-2 px-3 py-2 rounded hover:text-yellow-400 transition-colors"
+            >
+              {link.icon}
+              <span>{link.name}</span>
+            </a>
+          ))}
+        </div>
+
+        <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <div className="flex items-center space-x-3 cursor-pointer">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+            <AvatarFallback>ST</AvatarFallback>
+          </Avatar>
+          <div className="text-left hidden sm:block">
+            <p className="text-sm font-medium text-white">Shobhit Tiwari</p>
+            <p className="text-xs text-gray-300">@shobhit</p>
+          </div>
+          <div className="text-white">
+            {open ? (
+              <ChevronUp className="w-4 h-4 transition-transform" />
+            ) : (
+              <ChevronDown className="w-4 h-4 transition-transform" />
+            )}
+          </div>
+        </div>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent
+        align="end"
+        className="w-40 mt-2 rounded-lg animate-in fade-in zoom-in border-none bg-black"
+      >
+        <DropdownMenuItem className="flex cursor-pointer items-center border-none hover:border-none focus:border-none">
+          <Settings className="w-4 h-4 mr-2" />
+          Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem className="flex cursor-pointer items-center text-red-600 border-none hover:border-none focus:border-none">
+          <LogOut className="w-4 h-4 mr-2" />
+          Logout
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+      </nav>
+    </div>
+  );
+}
