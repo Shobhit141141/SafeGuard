@@ -3,35 +3,80 @@ import { CctvIcon, Pause, PauseCircle, PlayCircle } from 'lucide-react';
 import { Play } from 'next/font/google';
 import React, { useState, useRef, useEffect } from 'react';
 import { FaPause, FaPlay } from 'react-icons/fa';
+import { useIncidents } from '../contexts/IncidentContext';
+
+interface Camera {
+  id: number;
+  name: string;
+  location: string;
+}
+
+interface ApiIncident {
+  id: number;
+  type: string;
+  tsStart: string;
+  tsEnd: string;
+  thumbnailUrl: string;
+  resolved: boolean;
+  camera: Camera;
+}
 
 interface Incident {
   time: number;
   type: string;
   label: string;
   color: string;
+  originalData: ApiIncident;
 }
 
 const Timeline: React.FC = () => {
   const [currentTime, setCurrentTime] = useState<number>(13.5);
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [selectedCamera, setSelectedCamera] = useState<string>('Camera 01');
+
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [cameras, setCameras] = useState<Camera[]>([]);
   const timelineRef = useRef<SVGSVGElement | null>(null);
   const scrollWrapperRef = useRef<HTMLDivElement | null>(null);
 
-  const incidents: Incident[] = [
-    { time: 1.2, type: 'unauthorised', label: 'Unauthorised Access', color: '#ef4444' },
-    { time: 6.8, type: 'face', label: 'Face Recognised', color: '#3b82f6' },
-    { time: 9.5, type: 'traffic', label: 'Traffic Congestion', color: '#10b981' },
-    { time: 14.75, type: 'face', label: 'Face Recognised', color: '#3b82f6' },
-    { time: 16.2, type: 'multiple', label: 'Multiple Events', color: '#8b5cf6' },
-    { time: 18.3, type: 'unauthorised', label: 'Unauthorised Access', color: '#ef4444' },
-    { time: 19.1, type: 'gun', label: 'Gun Threat', color: '#dc2626' },
-    { time: 22.8, type: 'unauthorised', label: 'Unauthorised Access', color: '#ef4444' }
-  ];
 
-  const timelineWidth = 1600; // wider for scroll
-  const timelineHeight = 80;
+
+  const { incidents: apiIncidents, selectedIncident, setSelectedIncident, refreshIncidents, loading } = useIncidents();
+
+  useEffect(() => {
+    if (!apiIncidents) return;
+
+
+    const timelineIncidents = apiIncidents.map((incident: ApiIncident) => {
+      const startTime = new Date(incident.tsStart);
+      const timeInHours = startTime.getHours() + startTime.getMinutes() / 60;
+
+
+      let color = '#ef4444';
+      if (incident.type === 'Face Recognised') color = '#3b82f6';
+      else if (incident.type === 'Gun Threat') color = '#dc2626';
+      else if (incident.type === 'Unauthorised Access') color = '#ef4444';
+
+      return {
+        time: timeInHours,
+        type: incident.type.toLowerCase().replace(' ', '_'),
+        label: incident.type,
+        color,
+        originalData: incident
+      };
+    });
+
+    setIncidents(timelineIncidents);
+
+
+    const uniqueCameras = Array.from(new Set(apiIncidents.map((incident: ApiIncident) => incident.camera.id)))
+      .map(id => apiIncidents.find((incident: ApiIncident) => incident.camera.id === id)?.camera)
+      .filter(Boolean) as Camera[];
+    setCameras(uniqueCameras);
+  }, [apiIncidents]);
+
+  const timelineWidth = 1600;
+  const timelineHeight = 160;
   const hourMarkers = Array.from({ length: 25 }, (_, i) => i);
 
   const timeToPixel = (time: number): number => (time / 24) * timelineWidth;
@@ -56,7 +101,7 @@ const Timeline: React.FC = () => {
     const newTime = pixelToTime(x);
 
     const snapRange = 0.5;
-    const nearbyIncident = incidents.find((incident) => Math.abs(incident.time - newTime) < snapRange);
+    const nearbyIncident = filteredIncidents.find((incident) => Math.abs(incident.time - newTime) < snapRange);
     setCurrentTime(nearbyIncident ? nearbyIncident.time : newTime);
   };
 
@@ -69,15 +114,14 @@ const Timeline: React.FC = () => {
     const newTime = pixelToTime(x);
 
     const snapRange = 1;
-    const nearbyIncident = incidents.find((incident) => Math.abs(incident.time - newTime) < snapRange);
+    const nearbyIncident = filteredIncidents.find((incident) => Math.abs(incident.time - newTime) < snapRange);
     setCurrentTime(nearbyIncident ? nearbyIncident.time : newTime);
   };
 
-  const changeCamera = (camera: string) => {
-    setSelectedCamera(camera);
-    setCurrentTime(13.5);
-    setIsPlaying(false);
-  };
+
+
+
+  const filteredIncidents = incidents;
 
   const handleForward = () => setCurrentTime((prev) => Math.min(prev + 10 / 60, 24));
   const handleBackward = () => setCurrentTime((prev) => Math.max(prev - 10 / 60, 0));
@@ -111,7 +155,7 @@ const Timeline: React.FC = () => {
   }, [isPlaying]);
 
   return (
-    <div className='w-full px-4 py-2 h-[30vh]'>
+    <div className='w-full py-2 h-[30vh]'>
       {/* main div */}
       <div className=" bg-[#191919] text-white rounded-lg p-4 h-full overflow-hidden flex flex-col justify-between">
         <div className=''>
@@ -143,13 +187,16 @@ const Timeline: React.FC = () => {
             <p className="text-sm text-gray-300"><span>{formatTime(currentTime)} (15 June 2025)</span></p>
 
             {(() => {
-              const currentIncident = incidents.find((i) => Math.abs(i.time - currentTime) < 0.1);
+              const currentIncident = filteredIncidents.find((i) => Math.abs(i.time - currentTime) < 0.1);
+              if (currentIncident) {
+                setSelectedIncident(currentIncident.originalData);
+              }
               return currentIncident && (
                 <div className="">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: currentIncident.color }}></div>
                     <span className="font-semibold text-md" style={{ color: currentIncident.color }}>{currentIncident.label}</span>
-                    <span className="text-gray-400 text-sm">at {formatTime(currentIncident.time)}</span>
+                    <span className="text-gray-400 text-sm">at {formatTime(currentIncident.time)} - {currentIncident.originalData.camera.name}</span>
                   </div>
                 </div>
               );
@@ -159,15 +206,22 @@ const Timeline: React.FC = () => {
         </div>
         <div className='flex items-center justify-between gap-4'>
           {/* Camera List */}
-          <div className="flex flex-col gap-2 justify-center">
-            <p>Camera list</p>
-            {['Camera 01', 'Camera 02', 'Camera 03'].map((camera) => (
+          <div className="flex flex-col h-full justify-between py-2">
+            <p className='text-md'>Camera list</p>
+            {/* <button
+              key="all"
+              className={` py-1 rounded w-36  flex items-center gap-2 text-sm`}
+              
+            >
+              <CctvIcon className='w-5 h-5' /> All Cameras
+            </button> */}
+            {cameras.map((camera) => (
               <button
-                key={camera}
-                className={` py-1 rounded w-36 ${selectedCamera === camera ? 'text-yellow-500' : ''} flex items-center gap-2 text-sm`}
-                onClick={() => changeCamera(camera)}
+                key={camera.id}
+                className={`rounded w-36  flex items-center gap-2 text-sm`}
+
               >
-                <CctvIcon className='w-5 h-5' /> {camera}
+                <CctvIcon className='w-5 h-5' /> {camera.name}
               </button>
             ))}
           </div>
@@ -176,7 +230,7 @@ const Timeline: React.FC = () => {
 
 
             {/* Scrollable timeline */}
-            <div className=" border border-gray-700 rounded w-full" ref={scrollWrapperRef}>
+            <div className=" rounded w-full h-full" ref={scrollWrapperRef}>
               <svg
                 ref={timelineRef}
                 width={timelineWidth}
@@ -186,51 +240,88 @@ const Timeline: React.FC = () => {
                 <rect width={timelineWidth} height={timelineHeight} fill="transparent" />
                 {hourMarkers.map((hour) => (
                   <g key={hour}>
-                    <line
-                      x1={timeToPixel(hour)}
-                      y1={0}
-                      x2={timeToPixel(hour)}
-                      y2={10}
-                      stroke="#6b7280"
-                      strokeWidth={hour % 6 === 0 ? 2 : 1}
-                    />
-                    { (
-                      <text
-                        x={timeToPixel(hour)}
-                        y={25}
-                        fill="#9ca3af"
-                        fontSize="10"
-                        textAnchor="middle"
-                      >
-                        {hour.toString().padStart(2, '0')}:00
-                      </text>
-                    )}
-                  </g>
-                ))}
-                {/* Incident Badges */}
-                {incidents.map((incident, index) => (
-                  <g key={index} onClick={(e) => { e.stopPropagation(); setCurrentTime(incident.time); }} className="cursor-pointer" style={{
-                    backgroundColor: incident.color
-                  }}>
-                    <rect
-                      x={timeToPixel(incident.time) - 30}
-                      y={timelineHeight - 30}
-
-                      rx={5}
-
-                      opacity={0.85}
-                    />
+                    {Array.from({ length: 6 }, (_, i) => {
+                      const x = timeToPixel(hour + i / 6);
+                      return (
+                        <line
+                          key={i}
+                          x1={x}
+                          y1={0}
+                          x2={x}
+                          y2={i === 5 ? 18 : 10}
+                          stroke="#6b7280"
+                          strokeWidth={i === 5 ? 2 : 1}
+                        />
+                      );
+                    })}
                     <text
-                      x={timeToPixel(incident.time)}
-                      y={timelineHeight - 15}
-                      fill="#fff"
-                      fontSize="8"
+                      x={timeToPixel(hour + 5 / 6)}
+                      y={30}
+                      fill="#9ca3af"
+                      fontSize="10"
                       textAnchor="middle"
                     >
-                      {incident.label}
+                      {hour.toString().padStart(2, '0')}:00
                     </text>
                   </g>
                 ))}
+                {/* Incident Badges */}
+                {filteredIncidents.map((incident, index) => {
+                  const x = timeToPixel(incident.time);
+                  const badgeWidth = 120;
+                  const badgeHeight = 20;
+
+                  const cameraOrder = cameras.map((c) => c.name);
+                  const cameraIndex =
+                    cameraOrder.indexOf(incident.originalData.camera.name);
+                  const badgeSpacing = 40;
+                  const y =
+                    50 + cameraIndex * badgeSpacing
+
+
+                  return (
+                    <g
+                      key={`${incident.originalData.id}-${index}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentTime(incident.time);
+                        setSelectedIncident(incident.originalData);
+                        scrollWrapperRef.current?.scrollTo({
+                          left: x - 100,
+                          behavior: 'smooth'
+                        });
+                      }}
+                      className="cursor-pointer bg-red-500"
+                    >
+                      {/* Badge background */}
+                      <rect
+                        x={x - badgeWidth / 2}
+                        y={y}
+                        width={badgeWidth}
+                        height={badgeHeight}
+                        rx={10}
+                        fill={incident.color}
+                        opacity={0.9}
+                        stroke="#ffffff"
+                        strokeWidth={1}
+                      />
+
+                      {/* Badge text */}
+                      <text
+                        x={x}
+                        y={y + badgeHeight / 2 + 3}
+                        fill="#ffffff"
+                        fontSize="9"
+                        textAnchor="middle"
+                        className="select-none font-medium"
+                      >
+                        {incident.label}
+                      </text>
+
+
+                    </g>
+                  );
+                })}
                 {/* Scrubber */}
                 <g
                   transform={`translate(${timeToPixel(currentTime)}, 0)`}
@@ -239,7 +330,10 @@ const Timeline: React.FC = () => {
                 >
                   <rect x={-8} y={0} width={16} height={timelineHeight} fill="rgba(251, 191, 36, 0.2)" stroke="#fbbf24" strokeWidth={2} />
                   <polygon points="-6,0 6,0 8,8 -8,8" fill="#fbbf24" />
-                  <polygon points="-6,80 6,80 8,72 -8,72" fill="#fbbf24" />
+                  <polygon
+                    points={`-6,${timelineHeight} 6,${timelineHeight} 8,${timelineHeight - 8} -8,${timelineHeight - 8}`}
+                    fill="#fbbf24"
+                  />
                 </g>
               </svg>
             </div>

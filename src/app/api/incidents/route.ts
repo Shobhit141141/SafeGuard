@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../../generated/prisma";
 
 const prisma = new PrismaClient();
 
+/**
+ * Handles the GET request to fetch incidents based on their resolved status.
+ * @param req - The NextRequest object containing the request data.
+ * @returns A JSON response with the list of incidents or an error message if not found.
+ */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const resolved = searchParams.get("resolved");
@@ -13,4 +18,4 @@ export async function GET(req: NextRequest) {
     include: { camera: true },
   });
   return NextResponse.json(incidents);
-} 
+}

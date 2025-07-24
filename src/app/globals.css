@@ -2,13 +2,8 @@
 @import "tw-animate-css";
 
 * {
-  scrollbar-width: thin;
+  scrollbar-width: none ;
   scrollbar-color: #3d3e3e transparent;
 }
 
-main {
-  padding: 2rem;
-  background: #18181b;
-  min-height: 100vh;
-  color: #fff;
-}
+

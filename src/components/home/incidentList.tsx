@@ -6,42 +6,33 @@ import { IoCheckmarkDoneSharp } from "react-icons/io5";
 import { BiSolidCctv } from "react-icons/bi";
 import { FaRegClock } from "react-icons/fa";
 import { MdKeyboardArrowRight } from "react-icons/md";
-
-interface Camera {
-  id: number;
-  name: string;
-  location: string;
-}
-
-interface Incident {
-  id: number;
-  type: string;
-  tsStart: string;
-  tsEnd: string;
-  thumbnailUrl: string;
-  resolved: boolean;
-  camera: Camera;
-}
-
+import { useIncidents } from "@/components/contexts/IncidentContext";
+import { toast } from "sonner";
 function IncidentList() {
-  const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { incidents, selectedIncident, setSelectedIncident, refreshIncidents, loading, resolveIncident } = useIncidents();
+  const [unresolvedIncidents, setUnresolvedIncidents] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("/api/incidents?resolved=false")
-      .then((res) => res.json())
-      .then((data) => {
-        setIncidents(data);
-        setLoading(false);
-      });
-  }, []);
+    const unresolved = incidents.filter(incident => !incident.resolved);
+    console.log("Unresolved incidents:", unresolved);
+    setUnresolvedIncidents(unresolved);
+  }, [incidents]);
 
-  const handleResolve = async (id: number) => {
-    await fetch(`/api/incidents/${id}/resolve`, { method: "PATCH" });
-    setIncidents((prev) => prev.filter((i) => i.id !== id));
+  const handleResolve = async (id: number, event: React.MouseEvent) => {
+    event.stopPropagation();
+    try {
+      await resolveIncident(id);
+
+    } catch (error) {
+      console.error('Error resolving incident:', error);
+    }
   };
 
-  if (loading) return <div>Loading incidents...</div>;
+  const handleIncidentSelect = (incident: any) => {
+    setSelectedIncident(incident);
+  };
+
+  if (loading) return <div className="w-[40%] bg-[#191919] rounded-lg p-4 text-white flex items-center justify-center z-10"></div>;
 
   return (
     <div className="w-[40%] bg-[#191919] rounded-lg overflow-y-auto p-4 text-white shadow-md z-10">
@@ -49,18 +40,22 @@ function IncidentList() {
         <span className="flex items-center gap-2 font-semibold">
           <span className="text-red-500 bg-[#7F1D1D] rounded-full w-[24px] h-[24px] flex justify-center items-center border-2 border-[#450A0A]">
             <FiAlertTriangle className="text-red-500 w-[12px] h-[12px]" />
-          </span> {incidents.length} Unresolved Incidents
+          </span> {unresolvedIncidents.length} Unresolved Incidents
         </span>
         <span className="flex items-center gap-1 bg-[#000000] border border-[#404040] rounded-full px-2 py-1 text-xs font-semibold">
           <IoCheckmarkDoneSharp className="text-green-400 text-sm" />
+          {incidents.length - unresolvedIncidents.length}
+          {' '}
           Resolved incidents
         </span>
       </div>
       <div className="space-y-6">
-        {incidents.map((incident) => (
+        {unresolvedIncidents.map((incident) => (
           <div
             key={incident.id}
-            className="transition cursor-pointer flex justify-between items-center pr-3"
+            className={`transition cursor-pointer flex justify-between items-center pr-3 rounded-lg p-2 ${selectedIncident?.id === incident.id ? 'bg-[#2A2A2A] border border-yellow-500' : 'hover:bg-[#212121]'
+              }`}
+            onClick={() => handleIncidentSelect(incident)}
           >
             <div className="flex gap-2">
               <img src={incident.thumbnailUrl} alt="" className="w-31 h-18 object-cover rounded-lg" />
@@ -78,14 +73,15 @@ function IncidentList() {
               </div>
             </div>
             <button
-              className="text-yellow-400 text-xs my-auto"
-              onClick={() => handleResolve(incident.id)}
+              className="text-yellow-400 text-xs my-auto hover:text-yellow-500 cursor-pointer flex items-center transition-colors group "
+              onClick={(e) => handleResolve(incident.id, e)}
             >
-              Resolve <MdKeyboardArrowRight className="inline" />
+              Resolve
+              <MdKeyboardArrowRight className="inline translate-y-0.5 transition-all duration-200 group-hover:translate-x-1" />
             </button>
           </div>
         ))}
-        {incidents.length === 0 && <div className="text-gray-400">No unresolved incidents 🎉</div>}
+        {unresolvedIncidents.length === 0 && <div className="text-gray-400 flex justify-center items-center h-[50vh]">No unresolved incidents 🎉</div>}
       </div>
     </div>
   );
