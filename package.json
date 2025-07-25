@@ -7,10 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate": "prisma migrate dev --name init --schema=src/prisma/schema.prisma",
-    "generate": "prisma generate --schema=src/prisma/schema.prisma",
-    "db:setup": "npx prisma generate --schema=src/prisma/schema.prisma && npx prisma db push --schema=src/prisma/schema.prisma && npx ts-node --project src/prisma/tsconfig.json src/prisma/seed.ts",
-    "seed": "npx ts-node --project src/prisma/tsconfig.json src/prisma/seed.ts",
+    "migrate": "prisma migrate dev --name init",
+    "generate": "prisma generate",
+    "db:setup": "prisma generate && prisma db push && ts-node --project prisma/tsconfig.json prisma/seed.ts",
+    "seed": "ts-node --project prisma/tsconfig.json prisma/seed.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
