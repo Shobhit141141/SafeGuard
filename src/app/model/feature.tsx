@@ -1,7 +1,7 @@
 import { Lock, Shield, Signal, Zap, Layers } from 'lucide-react';
 import Image from 'next/image';
 
-export default function MandlacXSection() {
+export default function FeatureSection() {
   return (
     <section className="min-h-screen bg-black text-white p-8 relative overflow-hidden">
 
@@ -55,15 +55,12 @@ export default function MandlacXSection() {
           description="Instant on–device processing means faster alerts and quicker interventions during critical moments."
         />
         {/* Footer Text */}
-        <div className="mt-12 text-3xl italic text-white flex justify-center items-center flex-col ">
+        <div className="mt-12 text-3xl italic text-white flex justify-start items-center flex-col ">
           <span className="text-gray-400">Built for Speed.</span>
           Designed for <span className="font-semibold">Action.</span>
         </div>
       </div>
 
-
-      {/* Background Glow Blob */}
-      <div className="absolute top-[400px] left-1/2 -translate-x-1/2 w-[200px] h-[200px] bg-yellow-400 blur-[120px] rounded-full z-0 opacity-40" />
     </section>
   );
 }

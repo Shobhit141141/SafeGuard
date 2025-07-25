@@ -77,7 +77,7 @@ export default function Scene() {
   );
   return (
     <div className="w-full h-screen bg-black">
-      {isLoading && <LoadingSpinner />}
+      {/* {isLoading && <LoadingSpinner />} */}
 
       <Canvas
         camera={{

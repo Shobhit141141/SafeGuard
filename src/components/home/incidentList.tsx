@@ -11,6 +11,7 @@ import { toast } from "sonner";
 function IncidentList() {
   const { incidents, selectedIncident, setSelectedIncident, refreshIncidents, loading, resolveIncident } = useIncidents();
   const [unresolvedIncidents, setUnresolvedIncidents] = useState<any[]>([]);
+  const [showUnresolved, setShowUnresolved] = useState(false);
 
   useEffect(() => {
     const unresolved = incidents.filter(incident => !incident.resolved);
@@ -49,13 +50,29 @@ function IncidentList() {
           Resolved incidents
         </span>
       </div>
+
+      {/* toggle to only show unresolved incidents */}
+      <div className="flex items-center mb-4">
+        <input
+          type="checkbox"
+          id="show-unresolved"
+          className="mr-2"
+          checked={showUnresolved}
+          onChange={() => setShowUnresolved(!showUnresolved)}
+        />
+        <label htmlFor="show-unresolved" className="text-sm">
+          Show only unresolved incidents
+        </label>
+      </div>
       <div className="space-y-6">
-        {unresolvedIncidents.map((incident) => (
+        {(showUnresolved ? unresolvedIncidents : incidents).map((incident) => (
           <div
             key={incident.id}
-            className={`transition cursor-pointer flex justify-between items-center pr-3 rounded-lg p-2 ${selectedIncident?.id === incident.id ? 'bg-[#2A2A2A] border border-yellow-500' : 'hover:bg-[#212121]'
+            className={`transition cursor-pointer flex justify-between items-center pr-3 rounded-lg p-2 ${selectedIncident?.id === incident.id
+                ? 'bg-[#2A2A2A] border border-yellow-500'
+                : 'hover:bg-[#212121]'
               }`}
-            onClick={() => handleIncidentSelect(incident)}
+            onClick={() => {handleIncidentSelect(incident)}}
           >
             <div className="flex gap-2">
               <img src={incident.thumbnailUrl} alt="" className="w-31 h-18 object-cover rounded-lg" />
@@ -72,18 +89,29 @@ function IncidentList() {
                 </div>
               </div>
             </div>
-            <button
-              className="text-yellow-400 text-xs my-auto hover:text-yellow-500 cursor-pointer flex items-center transition-colors group "
-              onClick={(e) => handleResolve(incident.id, e)}
-            >
-              Resolve
-              <MdKeyboardArrowRight className="inline translate-y-0.5 transition-all duration-200 group-hover:translate-x-1" />
-            </button>
+            {incident.resolved ? (
+              <span className="text-green-400 text-xs my-auto flex items-center gap-1">
+                <IoCheckmarkDoneSharp className="inline" /> Resolved
+              </span>
+            ) : (
+              <button
+                className="text-yellow-400 text-xs my-auto hover:text-yellow-500 cursor-pointer flex items-center transition-colors group "
+                onClick={(e) => handleResolve(incident.id, e)}
+              >
+                Resolve
+                <MdKeyboardArrowRight className="inline translate-y-0.5 transition-all duration-200 group-hover:translate-x-1" />
+              </button>
+            )}
           </div>
         ))}
-        {unresolvedIncidents.length === 0 && <div className="text-gray-400 flex justify-center items-center h-[50vh]">No unresolved incidents 🎉</div>}
+        {(showUnresolved ? unresolvedIncidents.length === 0 : incidents.length === 0) && (
+          <div className="text-gray-400 flex justify-center items-center h-[50vh]">
+            No incidents 🎉
+          </div>
+        )}
       </div>
     </div>
+
   );
 }
 

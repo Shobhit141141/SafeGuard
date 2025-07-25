@@ -12,7 +12,7 @@ interface Camera {
 }
 
 function IncidentPlayer() {
-  const { incidents, selectedIncident, loading } = useIncidents();
+  const { incidents, selectedIncident, loading, setSelectedIncident } = useIncidents();
   const [allCameras, setAllCameras] = useState<Camera[]>([]);
 
   useEffect(() => {
@@ -58,15 +58,31 @@ function IncidentPlayer() {
         </span>
 
         <div className="absolute bottom-2 right-2 flex items-center gap-3">
-          {allCameras.slice(0, 2).map((camera, index) => (
-            <div key={camera.id} className="flex flex-col items-center bg-[#191919] rounded">
-              <div className="flex justify-between items-center w-full px-2 py-1">
-                <span className="text-white text-xs">{camera.name}</span>
-                <span className="text-white text-xs">⋮</span>
-              </div>
-              <img src="/cam_player.png" alt={`Camera ${camera.name}`} className="w-32 h-18 rounded" />
-            </div>
-          ))}
+          {allCameras
+            .filter(camera => camera.id !== selectedIncident.camera.id)
+            .slice(0, 2)
+            .map((camera) => {
+              const cameraIncident = incidents
+                .filter(incident => incident.camera.id === camera.id)
+                .sort((a, b) => new Date(b.tsStart).getTime() - new Date(a.tsStart).getTime())[0];
+
+              return (
+                <div key={camera.id} className="flex flex-col items-center bg-[#191919] rounded"
+                onClick={() => {
+                  setSelectedIncident(cameraIncident);
+                }}>
+                  <div className="flex justify-between items-center w-full px-2 py-1">
+                    <span className="text-white text-xs">{camera.name}</span>
+                    <span className="text-white text-xs">⋮</span>
+                  </div>
+                  <img
+                    src={cameraIncident?.thumbnailUrl || '/placeholder-camera.jpg'}
+                    alt={`Camera ${camera.name}`}
+                    className="w-32 h-18 rounded object-cover"
+                  />
+                </div>
+              );
+            })}
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import { AlertTriangle, CctvIcon, ChevronDown, ChevronUp, LayoutDashboard, LogOut, Settings, Users2 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function Navbar() {
@@ -36,14 +37,14 @@ export default function Navbar() {
         {/* Center - Navigation */}
         <div className="space-x-6 text-sm font-medium text-white hidden md:flex">
           {navLinks.map(link => (
-            <a
+            <Link
               key={link.name}
               href={link.href}
               className="flex items-center gap-2 px-3 py-2 rounded hover:text-yellow-400 transition-colors"
             >
               {link.icon}
               <span>{link.name}</span>
-            </a>
+            </Link>
           ))}
         </div>
 

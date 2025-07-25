@@ -184,7 +184,10 @@ const Timeline: React.FC = () => {
               <path d="M10.3333 11.1666V8.83329C10.3333 8.52387 10.4562 8.22713 10.675 8.00833C10.8938 7.78954 11.1906 7.66663 11.5 7.66663C11.8094 7.66663 12.1062 7.78954 12.325 8.00833C12.5437 8.22713 12.6667 8.52387 12.6667 8.83329V11.1666C12.6667 11.476 12.5437 11.7728 12.325 11.9916C12.1062 12.2104 11.8094 12.3333 11.5 12.3333C11.1906 12.3333 10.8938 12.2104 10.675 11.9916C10.4562 11.7728 10.3333 11.476 10.3333 11.1666Z" stroke="white" stroke-linecap="round" />
             </svg>
             </button>
-            <p className="text-sm text-gray-300"><span>{formatTime(currentTime)} (15 June 2025)</span></p>
+           <p className="text-sm text-gray-300">
+  <span>{formatTime(currentTime)} • {new Date().toLocaleDateString()}</span>
+</p>
+
 
             {(() => {
               const currentIncident = filteredIncidents.find((i) => Math.abs(i.time - currentTime) < 0.1);

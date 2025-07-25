@@ -70,16 +70,13 @@ export const IncidentProvider: React.FC<IncidentProviderProps> = ({ children }) 
         setIncidents(prevIncidents =>
           prevIncidents.map(incident =>
             incident.id === id
-              ? { ...incident, resolved: !incident.resolved }
+              ? { ...incident, resolved: true }
               : incident
           )
         );
 
         if (selectedIncident?.id === id) {
-          const unresolvedIncidents = incidents.filter(incident =>
-            !incident.resolved && incident.id !== id
-          );
-          setSelectedIncident(unresolvedIncidents.length > 0 ? unresolvedIncidents[0] : null);
+          setSelectedIncident(prev => prev ? { ...prev, resolved: true } : null);
         }
         toast.success("Incident resolved successfully");
 
