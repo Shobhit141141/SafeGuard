@@ -10,7 +10,8 @@
     "migrate": "prisma migrate dev --name init --schema=src/prisma/schema.prisma",
     "generate": "prisma generate --schema=src/prisma/schema.prisma",
     "db:setup": "npx prisma generate --schema=src/prisma/schema.prisma && npx prisma db push --schema=src/prisma/schema.prisma && npx ts-node --project src/prisma/tsconfig.json src/prisma/seed.ts",
-    "seed": "npx ts-node --project src/prisma/tsconfig.json src/prisma/seed.ts"
+    "seed": "npx ts-node --project src/prisma/tsconfig.json src/prisma/seed.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
