@@ -1,5 +1,4 @@
 import Scene from "@/components/home/3dmodel";
-import Image from "next/image";
 
 export default function FeatureModel() {
   return (

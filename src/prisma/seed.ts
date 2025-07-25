@@ -10,7 +10,7 @@ async function main() {
     }
   } catch (error) {
     console.warn(
-      "Incident model not found or inaccessible, skipping deleteMany for incidents."
+      "Incident model not found or inaccessible, skipping deleteMany for incidents.", error
     );
   }
 
@@ -21,7 +21,8 @@ async function main() {
     }
   } catch (error) {
     console.warn(
-      "Camera model not found or inaccessible, skipping deleteMany for cameras."
+      "Camera model not found or inaccessible, skipping deleteMany for cameras.",
+      error
     );
   }
 
@@ -34,7 +35,7 @@ async function main() {
       ],
     });
   } catch (error) {
-    console.warn("Camera table might be missing. Skipping camera creation.");
+    console.warn("Camera table might be missing. Skipping camera creation.", error);
     return;
   }
 
@@ -42,7 +43,7 @@ async function main() {
   try {
     [shopFloor, vault, entrance] = await prisma.camera.findMany();
   } catch (error) {
-    console.warn("Failed to fetch cameras. Skipping incident creation.");
+    console.warn("Failed to fetch cameras. Skipping incident creation.", error);
     return;
   }
 
@@ -150,8 +151,10 @@ async function main() {
     }
   } catch (error) {
     console.warn(
-      "Failed to create incidents. Table might be missing or invalid schema."
+      "Failed to create incidents. Table might be missing or invalid schema.",
+      error
     );
+    return;
   }
 
   console.log("Seeded cameras and incidents.");

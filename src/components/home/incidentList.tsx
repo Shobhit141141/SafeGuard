@@ -7,10 +7,10 @@ import { BiSolidCctv } from "react-icons/bi";
 import { FaRegClock } from "react-icons/fa";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { useIncidents } from "@/components/contexts/IncidentContext";
-import { toast } from "sonner";
+import { Checkbox } from "../ui/checkbox";
 function IncidentList() {
-  const { incidents, selectedIncident, setSelectedIncident, refreshIncidents, loading, resolveIncident } = useIncidents();
-  const [unresolvedIncidents, setUnresolvedIncidents] = useState<any[]>([]);
+  const { incidents, selectedIncident, setSelectedIncident, loading, resolveIncident } = useIncidents();
+  const [unresolvedIncidents, setUnresolvedIncidents] = useState<typeof incidents>([]);
   const [showUnresolved, setShowUnresolved] = useState(false);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ function IncidentList() {
     }
   };
 
-  const handleIncidentSelect = (incident: any) => {
+  const handleIncidentSelect = (incident: typeof incidents[0]) => {
     setSelectedIncident(incident);
   };
 
@@ -52,13 +52,11 @@ function IncidentList() {
       </div>
 
       {/* toggle to only show unresolved incidents */}
-      <div className="flex items-center mb-4">
-        <input
-          type="checkbox"
+      <div className="flex items-center mb-4 gap-2">
+        <Checkbox
           id="show-unresolved"
-          className="mr-2"
           checked={showUnresolved}
-          onChange={() => setShowUnresolved(!showUnresolved)}
+          onCheckedChange={() => setShowUnresolved(!showUnresolved)}
         />
         <label htmlFor="show-unresolved" className="text-sm">
           Show only unresolved incidents

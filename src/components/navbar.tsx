@@ -11,10 +11,10 @@ export default function Navbar() {
   const navLinks = [
     { name: "Dashboard", href: "/", icon: <LayoutDashboard className="w-4 h-4" /> },
     { name: "3D Model", href: "/model", icon: <CctvIcon className="w-4 h-4" /> },
-    { name: "Cameras", href: "/about", icon: <CctvIcon className="w-4 h-4" /> },
-    { name: "Scenes", href: "/services", icon: <Settings className="w-4 h-4" /> },
-    { name: "Incidents", href: "/contact", icon: <AlertTriangle className="w-4 h-4" /> },
-    { name: "Users", href: "/settings", icon: <Users2 className="w-4 h-4" /> },
+    { name: "Cameras", href: "/", icon: <CctvIcon className="w-4 h-4" /> },
+    { name: "Scenes", href: "/", icon: <Settings className="w-4 h-4" /> },
+    { name: "Incidents", href: "/", icon: <AlertTriangle className="w-4 h-4" /> },
+    { name: "Users", href: "/", icon: <Users2 className="w-4 h-4" /> },
   ];
 
   const [open, setOpen] = useState(false);
@@ -30,8 +30,8 @@ export default function Navbar() {
 
         {/* Left - Logo & Name */}
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-yellow-500 rounded-full shadow" />
-          <span className="text-xl font-semibold tracking-wide text-white">GoldNav</span>
+          <img src="/logo.png" alt="Logo" className=" h-6" />
+          <span className="text-xl text-white">MANDLAC<p className="font-bold inline">X</p></span>
         </div>
 
         {/* Center - Navigation */}
@@ -71,7 +71,7 @@ export default function Navbar() {
 
           <DropdownMenuContent
             align="end"
-            className="w-40 mt-2 rounded-lg animate-in fade-in zoom-in border-none bg-black"
+            className="w-40 mt-2 rounded-lg animate-in fade-in zoom-in border-none bg-[#191919] px-4 py-2 shadow-lg "
           >
             <DropdownMenuItem className="flex cursor-pointer items-center border-none hover:border-none focus:border-none">
               <Settings className="w-4 h-4 mr-2" />

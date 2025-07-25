@@ -4,7 +4,6 @@ import { Environment, OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import { Suspense, useRef, useState } from "react";
-import { Loader } from "lucide-react";
 import * as THREE from "three";
 import { useEffect } from "react";
 
@@ -30,17 +29,17 @@ function Model({
   const isSmallScreen = screenWidth < 768;
   const scale_lvl = isSmallScreen ? 20 : 32;
 
-  
+
   useEffect(() => {
     const box = new THREE.Box3().setFromObject(gltf.scene);
     const center = new THREE.Vector3();
     box.getCenter(center);
-    gltf.scene.position.sub(center); 
+    gltf.scene.position.sub(center);
     gltf.scene.scale.set(scale_lvl, scale_lvl, scale_lvl);
     onLoad?.();
-  }, []);
+  }, [gltf.scene, onLoad, scale_lvl]);
 
-  
+
   useFrame(() => {
     if (modelRef.current && !isInteracting) {
       modelRef.current.rotation.y += 0.01;
@@ -58,26 +57,12 @@ function Model({
   );
 }
 
-
-function LoadingSpinner() {
-  return (
-    <div className="absolute w-full h-screen flex items-center justify-center">
-      <div className="animate-spin">
-        <Loader className="w-8 h-8" />
-      </div>
-    </div>
-  );
-}
 export default function Scene() {
-  const [isLoading, setIsLoading] = useState(true);
   const [, setHovering] = useState(false);
   const [interacting, setInteracting] = useState(false);
-  const [screenWidth,] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 0,
-  );
+
   return (
     <div className="w-full h-screen bg-black">
-      {/* {isLoading && <LoadingSpinner />} */}
 
       <Canvas
         camera={{
@@ -94,13 +79,12 @@ export default function Scene() {
             enableRotate={true}
             minDistance={4.5}
             maxDistance={6}
-            onStart={() => setInteracting(true)} 
-            onEnd={() => setInteracting(false)} 
+            onStart={() => setInteracting(true)}
+            onEnd={() => setInteracting(false)}
           />
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1.5} />
           <Model
-            onLoad={() => setIsLoading(false)}
             isHovering={setHovering}
             isInteracting={interacting}
           />

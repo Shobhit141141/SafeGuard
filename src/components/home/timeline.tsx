@@ -1,7 +1,6 @@
 'use client';
-import { CctvIcon, Pause, PauseCircle, PlayCircle } from 'lucide-react';
-import { Play } from 'next/font/google';
-import React, { useState, useRef, useEffect } from 'react';
+import { CctvIcon } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FaPause, FaPlay } from 'react-icons/fa';
 import { useIncidents } from '../contexts/IncidentContext';
 
@@ -41,7 +40,7 @@ const Timeline: React.FC = () => {
 
 
 
-  const { incidents: apiIncidents, selectedIncident, setSelectedIncident, refreshIncidents, loading } = useIncidents();
+  const { incidents: apiIncidents, setSelectedIncident, loading } = useIncidents();
 
   useEffect(() => {
     if (!apiIncidents) return;
@@ -80,7 +79,7 @@ const Timeline: React.FC = () => {
   const hourMarkers = Array.from({ length: 25 }, (_, i) => i);
 
   const timeToPixel = (time: number): number => (time / 24) * timelineWidth;
-  const pixelToTime = (pixel: number): number => (pixel / timelineWidth) * 24;
+  const pixelToTime = useCallback((pixel: number): number => (pixel / timelineWidth) * 24, [timelineWidth]);
 
   const formatTime = (time: number): string => {
     const hours = Math.floor(time);
@@ -93,7 +92,9 @@ const Timeline: React.FC = () => {
     setIsDragging(true);
   };
 
-  const handleMouseMove = (e: globalThis.MouseEvent) => {
+  const filteredIncidents = incidents;
+
+  const handleMouseMove = useCallback((e: globalThis.MouseEvent) => {
     if (!isDragging || !timelineRef.current) return;
 
     const rect = timelineRef.current.getBoundingClientRect();
@@ -103,9 +104,9 @@ const Timeline: React.FC = () => {
     const snapRange = 0.5;
     const nearbyIncident = filteredIncidents.find((incident) => Math.abs(incident.time - newTime) < snapRange);
     setCurrentTime(nearbyIncident ? nearbyIncident.time : newTime);
-  };
+  }, [isDragging, timelineWidth, pixelToTime, filteredIncidents]);
 
-  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseUp = useCallback(() => setIsDragging(false), []);
 
   const handleTimelineClick = (e: React.MouseEvent) => {
     if (!timelineRef.current) return;
@@ -117,11 +118,6 @@ const Timeline: React.FC = () => {
     const nearbyIncident = filteredIncidents.find((incident) => Math.abs(incident.time - newTime) < snapRange);
     setCurrentTime(nearbyIncident ? nearbyIncident.time : newTime);
   };
-
-
-
-
-  const filteredIncidents = incidents;
 
   const handleForward = () => setCurrentTime((prev) => Math.min(prev + 10 / 60, 24));
   const handleBackward = () => setCurrentTime((prev) => Math.max(prev - 10 / 60, 0));
@@ -144,7 +140,7 @@ const Timeline: React.FC = () => {
       document.removeEventListener('mouseup', onMouseUp);
       document.body.style.cursor = 'default';
     };
-  }, [isDragging]);
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -154,6 +150,13 @@ const Timeline: React.FC = () => {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
+  if(loading || !apiIncidents) {
+    return (
+      <div className="w-full py-2 h-[30vh] bg-[#191919] rounded-lg z-10">
+        
+      </div>
+    );
+  }
   return (
     <div className='w-full py-2 h-[30vh]'>
       {/* main div */}
@@ -184,9 +187,9 @@ const Timeline: React.FC = () => {
               <path d="M10.3333 11.1666V8.83329C10.3333 8.52387 10.4562 8.22713 10.675 8.00833C10.8938 7.78954 11.1906 7.66663 11.5 7.66663C11.8094 7.66663 12.1062 7.78954 12.325 8.00833C12.5437 8.22713 12.6667 8.52387 12.6667 8.83329V11.1666C12.6667 11.476 12.5437 11.7728 12.325 11.9916C12.1062 12.2104 11.8094 12.3333 11.5 12.3333C11.1906 12.3333 10.8938 12.2104 10.675 11.9916C10.4562 11.7728 10.3333 11.476 10.3333 11.1666Z" stroke="white" stroke-linecap="round" />
             </svg>
             </button>
-           <p className="text-sm text-gray-300">
-  <span>{formatTime(currentTime)} • {new Date().toLocaleDateString()}</span>
-</p>
+            <p className="text-sm text-gray-300">
+              <span>{formatTime(currentTime)} • {new Date().toLocaleDateString()}</span>
+            </p>
 
 
             {(() => {

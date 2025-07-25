@@ -47,7 +47,7 @@ export const IncidentProvider: React.FC<IncidentProviderProps> = ({ children }) 
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refreshIncidents = async () => {
+  const refreshIncidents = React.useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch('/api/incidents');
@@ -61,7 +61,9 @@ export const IncidentProvider: React.FC<IncidentProviderProps> = ({ children }) 
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedIncident]);
+
+
 
   const resolveIncident = async (id: number) => {
     try {
@@ -93,7 +95,7 @@ export const IncidentProvider: React.FC<IncidentProviderProps> = ({ children }) 
 
   useEffect(() => {
     refreshIncidents();
-  }, []);
+  }, [refreshIncidents]);
 
   const value: IncidentContextType = {
     incidents,
