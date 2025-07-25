@@ -1,44 +1,117 @@
-'use client';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Environment, useGLTF } from '@react-three/drei';
-import { Suspense, useRef } from 'react';
-import * as THREE from 'three';
+"use client";
 
-function Model() {
-  const gltf = useGLTF('/model.glb');
-  const ref = useRef<THREE.Group>(null);
+import { Environment, OrbitControls } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
+import { Suspense, useRef, useState } from "react";
+import { Loader } from "lucide-react";
+import * as THREE from "three";
+import { useEffect } from "react";
+
+
+
+
+function Model({
+  onLoad,
+  isHovering,
+  isInteracting,
+}: {
+  onLoad?: () => void;
+  isHovering: (hovering: boolean) => void;
+  isInteracting: boolean;
+}) {
+  const gltf = useGLTF("/model2.glb");
+  const modelRef = useRef<THREE.Group>(null);
+
+  const [screenWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 0
+  );
+
+  const isSmallScreen = screenWidth < 768;
+  const scale_lvl = isSmallScreen ? 20 : 32;
+
+  
+  useEffect(() => {
+    const box = new THREE.Box3().setFromObject(gltf.scene);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    gltf.scene.position.sub(center); 
+    gltf.scene.scale.set(scale_lvl, scale_lvl, scale_lvl);
+    onLoad?.();
+  }, []);
+
+  
   useFrame(() => {
-    if (ref.current) {
-      ref.current.rotation.z += 0.005;
+    if (modelRef.current && !isInteracting) {
+      modelRef.current.rotation.y += 0.01;
     }
   });
 
-  return <primitive ref={ref} object={gltf.scene} scale={5} />;
+  return (
+    <group ref={modelRef}>
+      <primitive
+        object={gltf.scene}
+        onPointerOver={() => isHovering(true)}
+        onPointerOut={() => isHovering(false)}
+      />
+    </group>
+  );
 }
 
-export default function ThreeDViewer() {
+
+function LoadingSpinner() {
   return (
-    <div className="h-screen w-full mx-auto bg-black rounded-lg shadow-lg overflow-hidden">
-      <Canvas camera={{ position: [3, 3, 3], fov: 45 }}>
-        {/* Lights */}
-        <ambientLight intensity={0.4} />
-        <directionalLight position={[5, 5, 5]} intensity={0.6} castShadow />
-        <spotLight position={[2, 5, 2]} angle={0.3} penumbra={0.5} intensity={0.8} castShadow />
+    <div className="absolute w-full h-screen flex items-center justify-center">
+      <div className="animate-spin">
+        <Loader className="w-8 h-8" />
+      </div>
+    </div>
+  );
+}
+export default function Scene() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [, setHovering] = useState(false);
+  const [interacting, setInteracting] = useState(false);
+  const [screenWidth,] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 0,
+  );
+  return (
+    <div className="w-full h-screen bg-black">
+      {isLoading && <LoadingSpinner />}
 
-        {/* Model  */}
+      <Canvas
+        camera={{
+          position: [0, 2, 5],
+          fov: 75,
+
+        }}
+        className="bg-transparent "
+      >
         <Suspense fallback={null}>
-          <Model />
-          <Environment preset="forest" />
+          <OrbitControls
+            enableZoom={false}
+            enablePan={true}
+            enableRotate={true}
+            minDistance={4.5}
+            maxDistance={6}
+            onStart={() => setInteracting(true)} 
+            onEnd={() => setInteracting(false)} 
+          />
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} intensity={1.5} />
+          <Model
+            onLoad={() => setIsLoading(false)}
+            isHovering={setHovering}
+            isInteracting={interacting}
+          />
+          <Environment preset="warehouse" />
         </Suspense>
-
-        {/* Controls */}
-        <OrbitControls
-          enableZoom={true}
-          enablePan={true}
-          maxPolarAngle={Math.PI / 2}
-          autoRotate={true}
-        />
       </Canvas>
     </div>
   );
 }
+
+
+useGLTF.preload(
+  `/model2.glb`
+);
