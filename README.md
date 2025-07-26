@@ -1,5 +1,15 @@
 Live URL: [safeguard-st.vercel.app](https://safeguard-st.vercel.app)
 
+# Pages 
+- **Home**: Displays Incident Player, Incident List, and Timeline components.
+  - **Incident Player**: Allows users to play, pause, and navigate through incidents.
+  - **Incident List**: Lists all incidents with thumbnails and titles.
+  - **Timeline**: Displays a timeline of incidents with controls to navigate through time.
+
+- **3D Model**: Displays a 3D model of the incident scene using Three.js.
+  - **Model Viewer and Controls**: Allows users to interact with the 3D model, including zooming and rotating.
+  - **MandalaCX Features**: Provides advanced analytics and insights into the incident data.
+
 # Tech Decisions 
 This project is built using the following technologies:
 - **Next.js**: Used for server-side rendering and building the application.
@@ -10,7 +20,7 @@ This project is built using the following technologies:
 - **Shadcn UI**: set of components for building UI.
 - **Three.js**: Used for 3D graphics and animations.
 
-## Getting Started
+# Getting Started
 
 1. Clone the repository:
 
