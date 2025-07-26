@@ -1,4 +1,5 @@
 import Scene from "@/components/home/3dmodel";
+import { AlertOctagon } from "lucide-react";
 
 export default function FeatureModel() {
   return (
@@ -11,6 +12,18 @@ export default function FeatureModel() {
         <span className="font-semibold">MandlacX Edge</span>{" "}
         <span className="italic">Processor</span>
       </h2>
+
+
+      <p className="text-yellow-500 text-center bg-black animate-pulse flex flex-wrap items-center justify-center mb-8 px-4 py-2">
+  <AlertOctagon className="mr-2" />
+  THIS MODEL VIEWER HAS
+  <span className="font-semibold italic text-white mx-1">SOME ISSUES IN PROD</span>
+  I AM WORKING ON IT —
+  <span className="font-semibold italic text-white mx-1">PLEASE USE THE LOCAL DEVELOPMENT ENVIRONMENT</span>
+  FOR TESTING
+</p>
+
+
 
       {/* Grid */}
       <div className="relative max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-center">

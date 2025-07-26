@@ -10,6 +10,9 @@ Live URL: [safeguard-st.vercel.app](https://safeguard-st.vercel.app)
   - **Model Viewer and Controls**: Allows users to interact with the 3D model, including zooming and rotating.
   - **MandalaCX Features**: Provides advanced analytics and insights into the incident data.
 
+> ⚠️ **THIS MODEL VIEWER HAS _SOME ISSUES IN PROD_**  
+> **I AM WORKING ON IT — _PLEASE USE THE LOCAL DEVELOPMENT ENVIRONMENT_ FOR TESTING**
+
 # Tech Decisions 
 This project is built using the following technologies:
 - **Next.js**: Used for server-side rendering and building the application.
