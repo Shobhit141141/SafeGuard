@@ -40,7 +40,7 @@ const Timeline: React.FC = () => {
 
 
 
-  const { incidents: apiIncidents, setSelectedIncident, loading } = useIncidents();
+  const { incidents: apiIncidents, selectedIncident, setSelectedIncident, loading } = useIncidents();
 
   useEffect(() => {
     if (!apiIncidents) return;
@@ -74,6 +74,23 @@ const Timeline: React.FC = () => {
     setCameras(uniqueCameras);
   }, [apiIncidents]);
 
+  // Update timeline position when incident is selected from the list
+  useEffect(() => {
+    if (selectedIncident) {
+      const selectedTimelineIncident = incidents.find(
+        incident => incident.originalData.id === selectedIncident.id
+      );
+      if (selectedTimelineIncident) {
+        setCurrentTime(selectedTimelineIncident.time);
+        // Scroll to the incident position
+        scrollWrapperRef.current?.scrollTo({
+          left: timeToPixel(selectedTimelineIncident.time) - 100,
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [selectedIncident, incidents]);
+
   const timelineWidth = 1600;
   const timelineHeight = 160;
   const hourMarkers = Array.from({ length: 25 }, (_, i) => i);
@@ -104,6 +121,9 @@ const Timeline: React.FC = () => {
     const snapRange = 0.5;
     const nearbyIncident = filteredIncidents.find((incident) => Math.abs(incident.time - newTime) < snapRange);
     setCurrentTime(nearbyIncident ? nearbyIncident.time : newTime);
+    if (nearbyIncident) {
+      setSelectedIncident(nearbyIncident.originalData);
+    }
   }, [isDragging, timelineWidth, pixelToTime, filteredIncidents]);
 
   const handleMouseUp = useCallback(() => setIsDragging(false), []);
@@ -117,6 +137,9 @@ const Timeline: React.FC = () => {
     const snapRange = 1;
     const nearbyIncident = filteredIncidents.find((incident) => Math.abs(incident.time - newTime) < snapRange);
     setCurrentTime(nearbyIncident ? nearbyIncident.time : newTime);
+    if (nearbyIncident) {
+      setSelectedIncident(nearbyIncident.originalData);
+    }
   };
 
   const handleForward = () => setCurrentTime((prev) => Math.min(prev + 10 / 60, 24));
@@ -150,10 +173,19 @@ const Timeline: React.FC = () => {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
-  if(loading || !apiIncidents) {
+  const handleBadgeClick = (incident: Incident, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentTime(incident.time);
+    setSelectedIncident(incident.originalData);
+    scrollWrapperRef.current?.scrollTo({
+      left: timeToPixel(incident.time) - 100,
+      behavior: 'smooth'
+    });
+  };
+  if (loading || !apiIncidents) {
     return (
       <div className="w-full py-2 h-[30vh] bg-[#191919] rounded-lg z-10">
-        
+
       </div>
     );
   }
@@ -194,9 +226,6 @@ const Timeline: React.FC = () => {
 
             {(() => {
               const currentIncident = filteredIncidents.find((i) => Math.abs(i.time - currentTime) < 0.1);
-              if (currentIncident) {
-                setSelectedIncident(currentIncident.originalData);
-              }
               return currentIncident && (
                 <div className="">
                   <div className="flex items-center gap-2">
@@ -288,15 +317,7 @@ const Timeline: React.FC = () => {
                   return (
                     <g
                       key={`${incident.originalData.id}-${index}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCurrentTime(incident.time);
-                        setSelectedIncident(incident.originalData);
-                        scrollWrapperRef.current?.scrollTo({
-                          left: x - 100,
-                          behavior: 'smooth'
-                        });
-                      }}
+                      onClick={(e) => { handleBadgeClick(incident, e) }}
                       className="cursor-pointer bg-red-500"
                     >
                       {/* Badge background */}

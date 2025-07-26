@@ -61,7 +61,7 @@ export const IncidentProvider: React.FC<IncidentProviderProps> = ({ children }) 
     } finally {
       setLoading(false);
     }
-  }, [selectedIncident]);
+  }, []);
 
 
 
